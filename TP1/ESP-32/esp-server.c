@@ -2,7 +2,7 @@
 WiFiServer server(80);
 
 const char* ssid = "Fibertel WiFi298 2.4GHz";
-const char* password = "0041332992";
+const char* password = "#";
 
 void setup() {
   Serial.begin(115200);

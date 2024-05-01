@@ -2,7 +2,7 @@
 WiFiClient client;
 
 const char* ssid = "Fibertel WiFi298 2.4GHz";
-const char* password = "0041332992";
+const char* password = "#";
 const char* host = "192.168.0.143";
 int port = 80;
 unsigned long bufferSizes[] = {1000, 10000, 100000, 1000000};
