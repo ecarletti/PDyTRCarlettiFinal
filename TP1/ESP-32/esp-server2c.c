@@ -56,3 +56,7 @@ void loop() {
     client.stop();
   }
 }
+
+
+/* Servidor iniciado y esperando conexiones...
+Buffer hash (calculado): 1306728104 - Data Length (n calculado): 999 */

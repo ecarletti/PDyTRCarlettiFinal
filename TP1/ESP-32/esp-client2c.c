@@ -60,3 +60,7 @@ if (client.connect(host, port)) {
   }
   delay(10000); // Espera antes de la próxima conexión
 }
+
+/* Conectado a WiFi
+Generando buffer ...
+Buffer hash: 1306728104 - Data Length: 999Datos recibidos correctamente */
