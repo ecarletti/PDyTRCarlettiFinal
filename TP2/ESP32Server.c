@@ -122,7 +122,7 @@ void handleList(WiFiClient &client, String request) {
   File file = root.openNextFile();
   String fileList = "";
   while (file) {
-    Serial.println("estoy en el while " + String(file.name()));
+    // Serial.println("archivo " + String(file.name()));
     fileList += String(file.name()) + "\n";
     file = root.openNextFile();
   }
