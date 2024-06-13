@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
 public class ESP32Client {
-    private static final String SERVER_IP = "192.168.0.143";
+    private static final String SERVER_IP = "192.168.0.143"; // Reemplaza con la IP de tu ESP32
     private static final int SERVER_PORT = 80;
 
     public static void main(String[] args) {
@@ -60,14 +60,18 @@ public class ESP32Client {
 
             char[] buffer = new char[256];
             int bytesRead = in.read(buffer);
-            fos.write(new String(buffer, 0, bytesRead).getBytes());
+            String fileContent = new String(buffer, 0, bytesRead);
+            fos.write(fileContent.getBytes());
 
             // Leer y mostrar la cantidad de bytes leídos desde el servidor
-            System.out.println("Bytes read: " + in.readLine());
+            System.out.println("Bytes read: " + bytesRead);
+            // Imprimir el contenido del archivo
+            System.out.println("File content:\n" + fileContent);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 
     public static void sendFileToServer(String localFileName, String serverFileName) {
         try (Socket socket = new Socket(SERVER_IP, SERVER_PORT);
@@ -83,7 +87,7 @@ public class ESP32Client {
             socket.getOutputStream().flush();
 
             // Leer y mostrar la cantidad de bytes escritos en el servidor
-            System.out.println("Bytes written: " + in.readLine());
+            System.out.println("Bytes written: " + bytesRead);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -98,7 +102,6 @@ public class ESP32Client {
 
             String fileList;
             while ((fileList = in.readLine()) != null) {
-                // Leer y mostrar los archivos del servidor
                 System.out.println(fileList);
             }
         } catch (IOException e) {

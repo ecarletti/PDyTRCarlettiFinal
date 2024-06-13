@@ -2,7 +2,7 @@
 #include <SPIFFS.h>
 
 const char* ssid = "Fibertel WiFi298 2.4GHz";
-const char* password = "#";
+const char* password = "0041332992";
 WiFiServer server(80);
 
 void setup() {
@@ -60,6 +60,7 @@ void handleRead(WiFiClient &client, String request) {
   String fileName = request.substring(idx1, idx2);
   int position = request.substring(idx2 + 1, idx3).toInt();
   int length = request.substring(idx3 + 1).toInt();
+  Serial.println("fileName: " + String(fileName));
 
   File file = SPIFFS.open("/" + fileName, FILE_READ);
   if (!file) {
@@ -74,6 +75,7 @@ void handleRead(WiFiClient &client, String request) {
   client.write(buffer, bytesRead);
   file.close();
   client.printf("\n%d\n", bytesRead);
+  Serial.println("bytesRead: " + String(bytesRead));
 }
 
 void handleWrite(WiFiClient &client, String request) {
@@ -108,12 +110,12 @@ void handleList(WiFiClient &client, String request) {
   //Serial.println("path: " + String(path));
 
   File root = SPIFFS.open("/");
-  Serial.println("root: " + String(root));
+  //Serial.println("root: " + String(root));
   if (!root) {
     client.println("ERROR: Directory not found");
     return;
   }
-  Serial.println("root.isDirectory: " + String(root.isDirectory()));
+  //Serial.println("root.isDirectory: " + String(root.isDirectory()));
   if (!root.isDirectory()) {
     client.println("ERROR: Not a directory");
     return;
@@ -122,7 +124,7 @@ void handleList(WiFiClient &client, String request) {
   File file = root.openNextFile();
   String fileList = "";
   while (file) {
-    // Serial.println("archivo " + String(file.name()));
+    //Serial.println("estoy en el while " + String(file.name()));
     fileList += String(file.name()) + "\n";
     file = root.openNextFile();
   }
