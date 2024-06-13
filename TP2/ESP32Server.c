@@ -1,10 +1,8 @@
 #include <WiFi.h>
-#include <FS.h>
 #include <SPIFFS.h>
 
 const char* ssid = "Fibertel WiFi298 2.4GHz";
 const char* password = "#";
-
 WiFiServer server(80);
 
 void setup() {
@@ -24,15 +22,8 @@ void setup() {
     return;
   }
 
-  // Crear un archivo de prueba
-  File file = SPIFFS.open("/serverFile.txt", FILE_WRITE);
-  if (!file) {
-    Serial.println("Error al crear archivo de prueba");
-    return;
-  }
-  file.println("Este es un archivo de prueba para verificar la lectura desde el ESP32. Se agrega mas descripcion para agregar mayor longitud de bytes al file.");
-  file.close();
-  Serial.println("Archivo de prueba creado");
+  // Crear directorio y archivos de prueba
+  createTestFiles();
 
   server.begin();
   Serial.println("Servidor iniciado y esperando conexiones...");
@@ -48,11 +39,11 @@ void loop() {
         Serial.println("Solicitud recibida: " + request);
 
         if (request.startsWith("READ")) {
-          Serial.println("Solicitud READ");
           handleRead(client, request);
         } else if (request.startsWith("WRITE")) {
-          Serial.println("Solicitud WRITE");
           handleWrite(client, request);
+        } else if (request.startsWith("LIST")) {
+          handleList(client, request);
         }
       }
     }
@@ -66,27 +57,12 @@ void handleRead(WiFiClient &client, String request) {
   int idx2 = request.indexOf(' ', idx1);
   int idx3 = request.indexOf(' ', idx2 + 1);
 
-  Serial.println("idx1: " + String(idx1));
-  Serial.println("idx2: " + String(idx2));
-  Serial.println("idx3: " + String(idx3));
-
-  if (idx1 == 0 || idx2 == -1 || idx3 == -1) {
-    Serial.println("Error: índices no encontrados en la solicitud");
-    client.println("ERROR: Invalid request format");
-    return;
-  }
-
   String fileName = request.substring(idx1, idx2);
   int position = request.substring(idx2 + 1, idx3).toInt();
   int length = request.substring(idx3 + 1).toInt();
 
-  Serial.println("fileName: " + fileName);
-  Serial.println("position: " + String(position));
-  Serial.println("length: " + String(length));
-
   File file = SPIFFS.open("/" + fileName, FILE_READ);
   if (!file) {
-    Serial.println("ERROR: File not found");
     client.println("ERROR: File not found");
     return;
   }
@@ -98,7 +74,6 @@ void handleRead(WiFiClient &client, String request) {
   client.write(buffer, bytesRead);
   file.close();
   client.printf("\n%d\n", bytesRead);
-  Serial.printf("\nBytes leídos: %d\n", bytesRead);
 }
 
 void handleWrite(WiFiClient &client, String request) {
@@ -108,16 +83,12 @@ void handleWrite(WiFiClient &client, String request) {
   String fileName = request.substring(idx1, idx2);
   int length = request.substring(idx2 + 1).toInt();
 
-  Serial.println("fileName: " + fileName);
-  Serial.println("length: " + String(length));
-
   File file = SPIFFS.open("/" + fileName, FILE_APPEND);
   if (!file) {
     file = SPIFFS.open("/" + fileName, FILE_WRITE);
   }
 
   if (!file) {
-    Serial.println("ERROR: Unable to open file for writing");
     client.println("ERROR: Unable to open file for writing");
     return;
   }
@@ -128,5 +99,52 @@ void handleWrite(WiFiClient &client, String request) {
 
   file.close();
   client.printf("\n%d\n", bytesWritten);
-  Serial.printf("\nBytes escritos: %d\n", bytesWritten);
 }
+
+void handleList(WiFiClient &client, String request) {
+  //int idx1 = request.indexOf(' ') + 1;
+  //String path = request.substring(idx1);
+  //Serial.println("idx1: " + String(idx1));
+  //Serial.println("path: " + String(path));
+
+  File root = SPIFFS.open("/");
+  Serial.println("root: " + String(root));
+  if (!root) {
+    client.println("ERROR: Directory not found");
+    return;
+  }
+  Serial.println("root.isDirectory: " + String(root.isDirectory()));
+  if (!root.isDirectory()) {
+    client.println("ERROR: Not a directory");
+    return;
+  }
+
+  File file = root.openNextFile();
+  String fileList = "";
+  while (file) {
+    Serial.println("estoy en el while " + String(file.name()));
+    fileList += String(file.name()) + "\n";
+    file = root.openNextFile();
+  }
+  client.print(fileList);
+  Serial.println(fileList);
+}
+
+
+void createFile(const char* path, const char* content) {
+  File file = SPIFFS.open(path, FILE_WRITE);
+  if (file) {
+    file.println(content);
+    file.close();
+    Serial.printf("Archivo %s creado\n", path);
+  } else {
+    Serial.printf("Error al crear el archivo %s\n", path);
+  }
+}
+
+void createTestFiles() {
+  createFile("/serverFile.txt", "Este es un archivo de prueba para verificar la lectura desde el ESP32. Se agrega más descripción para agregar mayor longitud de bytes al archivo.");
+  createFile("/test1.txt", "Este es el archivo de prueba 1.");
+  createFile("/test2.txt", "Este es el archivo de prueba 2.");
+}
+
