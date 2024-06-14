@@ -2,7 +2,7 @@
 #include <SPIFFS.h>
 
 const char* ssid = "Fibertel WiFi298 2.4GHz";
-const char* password = "0041332992";
+const char* password = "#";
 WiFiServer server(80);
 
 void setup() {
